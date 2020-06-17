@@ -490,7 +490,7 @@ var PatientInfo = translate()(React.createClass({
 
   renderDataSources: function() {
     const { t } = this.props;
-    if (this.isSamePersonUserAndPatient()) {
+    if (false && this.isSamePersonUserAndPatient()) {
       return (
         <Element name="dexcomConnect" className="PatientPage-dataSources">
           <div className="PatientPage-sectionTitle">{t('My Data Sources')}</div>

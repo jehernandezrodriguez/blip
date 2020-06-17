@@ -26,7 +26,7 @@ var LoginNav = translate()(React.createClass({
   },
 
   render: function() {
-    var link = this.renderLink();
+    var link = null // this.renderLink();
 
     return (
       <div className="container-nav-outer login-nav">

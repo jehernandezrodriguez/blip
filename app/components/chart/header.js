@@ -153,12 +153,7 @@ const Header = translate()(class Header extends Component {
           {this.renderNavButton(mostRecentClass, this.props.onClickMostRecent, this.props.iconMostRecent)}
         </div>
         <div className="app-no-print patient-data-subnav-right">
-          <a href="" className={settingsLinkClass} onClick={this.props.onClickSettings}>{t('Device settings')}</a>
-          <a href="" className={printLinkClass} onClick={this.props.onClickPrint}>
-            {this.props.printReady && <img className="print-icon" src={printPng} alt="Print" />}
-            {!this.props.printReady && <Loading className="print-loading-spinner" width={16} height={16} delay={0} type="spin" color="#fff" />}
-            {t('Print')}
-          </a>
+          {/* <a href="" className={settingsLinkClass} onClick={this.props.onClickSettings}>{t('Device settings')}</a>*/}
         </div>
       </div>
     );

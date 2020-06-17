@@ -71,11 +71,7 @@ export default translate()(React.createClass({
     };
 
     return (
-      <IndexLink
-        to="/"
-        className="Navbar-logo"
-        onClick={handleClick}>
-        <img src={logoSrc}/>
+      <IndexLink to="/">
       </IndexLink>
     );
   },
@@ -138,6 +134,7 @@ export default translate()(React.createClass({
     }
 
     var displayName = this.getUserDisplayName();
+    var rol = this.getRol();
     var self = this;
     var handleClickUser = function() {
       self.props.trackMetric('Clicked Navbar Logged In User');
@@ -183,8 +180,8 @@ export default translate()(React.createClass({
           <div onClick={this.toggleDropdown}>
             <i className='Navbar-icon Navbar-icon-profile icon-profile'></i>
             <div className="Navbar-logged">
-              <span className="Navbar-loggedInAs">{t('Logged in as ')}</span>
               <span className="Navbar-userName" ref="userFullName" title={displayName}>{displayName}</span>
+              <span className="Navbar-loggedInAs">/{rol}</span>
             </div>
             <i className='Navbar-icon Navbar-icon-down icon-arrow-down'></i>
             <div className='clear'></div>
@@ -210,6 +207,11 @@ export default translate()(React.createClass({
 
   getUserDisplayName: function() {
     return personUtils.fullName(this.props.user);
+  },
+
+  getRol: function() {
+    const {t} = this.props;
+    return personUtils.isPatient(this.props.user) ? t('Patient') : t('Health professional');
   },
 
   isSamePersonUserAndPatient: function() {

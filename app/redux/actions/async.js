@@ -890,7 +890,33 @@ export function fetchAssociatedAccounts(api) {
           createActionError(ErrorMessages.ERR_FETCHING_ASSOCIATED_ACCOUNTS, err), err
         ));
       } else {
-        dispatch(sync.fetchAssociatedAccountsSuccess(accounts));
+
+        const fetchers = {}
+        for (var i = 0; i < accounts.patients.length; i++) {
+         accounts.patients[i]['notesCount'] = 0;
+         accounts.patients[i]['notifications'] = [];
+
+         let id = accounts.patients[i].userid;
+         fetchers[id] = api.team.getNotifications.bind(api, id,{});
+        }
+
+        async.parallel(async.reflectAll(fetchers), function(err, results) {
+          for (var i = 0; i < accounts.patients.length; i++) {
+            let key = accounts.patients[i].userid;
+            let cant = 0;
+            let notis = [];
+
+            if (results.hasOwnProperty(key) && results[key].hasOwnProperty('value') && results[key].value.hasOwnProperty('count')) {
+              cant = results[key].value.count;
+
+              notis =  _.map(results[key].value.notes,'time').join('</br>')
+            }
+            accounts.patients[i]['notesCount'] = cant;
+            accounts.patients[i]['notifications'] = notis;
+          }
+
+          dispatch(sync.fetchAssociatedAccountsSuccess(accounts));
+        });
       }
     });
   };
@@ -1114,6 +1140,9 @@ export function createMessageThread(api, message, cb = _.noop) {
   return (dispatch, getState) => {
     dispatch(sync.createMessageThreadRequest());
 
+    var rol = message.rol;
+    delete message.rol;
+
     api.team.startMessageThread(message, (err, messageId) => {
       cb(err, messageId);
 
@@ -1122,10 +1151,41 @@ export function createMessageThread(api, message, cb = _.noop) {
           createActionError(ErrorMessages.ERR_CREATING_MESSAGE_THREAD, err), err
         ));
       } else {
-        const messageWithId = { ...message, id: messageId };
-        const { blip: { currentPatientInViewId } } = getState();
-        dispatch(sync.createMessageThreadSuccess(messageWithId));
-        dispatch(worker.dataWorkerAddDataRequest([messageWithId], true, currentPatientInViewId));
+        // notifify all users associated
+        const fetchers = {}
+        if (rol === 'clinic') {
+
+          let { blip: {
+            allUsersMap,
+            currentPatientInViewId,
+          }} = getState();
+
+          let fullName = 'Doctor'
+          // if (allUsersMap && allUsersMap[currentPatientInViewId] && allUsersMap[currentPatientInViewId].hasOwnProperty('profile') ) {
+          //   fullName = allUsersMap[currentPatientInViewId].profile.fullName
+          // }
+          if (message.user && message.user.fullName)
+            fullName = message.user.fullName
+
+          var note = {rol, user: message.groupid,fullName, time: message.timestamp, noteId: message.id}
+          fetchers[rol] =  api.team.sendNotification.bind(api,note)
+        } else {
+
+          let team = getTeamPatient(getState)
+
+          for (var i = 0; i < team.length; i++) {
+            let key = rol+'-'+team[i].userid
+            var note = {rol, user: team[i].userid, fullName: team[i].profile.fullName, time: message.timestamp, noteId: message.id, senderId: message.userid}
+            fetchers[key] = api.team.sendNotification.bind(api, note)
+          }
+        }
+
+        async.parallel(async.reflectAll(fetchers), function(err, results) {
+          const messageWithId = { ...message, id: messageId };
+          const { blip: { currentPatientInViewId } } = getState();
+          dispatch(sync.createMessageThreadSuccess(messageWithId));
+          dispatch(worker.dataWorkerAddDataRequest([messageWithId], true, currentPatientInViewId));
+        });
       }
     });
   };
@@ -1141,6 +1201,9 @@ export function editMessageThread(api, message, cb = _.noop) {
   return (dispatch, getState) => {
     dispatch(sync.editMessageThreadRequest());
 
+    var rol = message.rol;
+    delete message.rol;
+
     api.team.editMessage(message, err => {
       cb(err);
 
@@ -1149,9 +1212,39 @@ export function editMessageThread(api, message, cb = _.noop) {
           createActionError(ErrorMessages.ERR_EDITING_MESSAGE_THREAD, err), err
         ));
       } else {
-        const { blip: { currentPatientInViewId } } = getState();
-        dispatch(sync.editMessageThreadSuccess(message));
-        dispatch(worker.dataWorkerUpdateDatumRequest(message, currentPatientInViewId));
+        const fetchers = {}
+        if (rol === 'clinic') {
+
+          let { blip: {
+            allUsersMap,
+            currentPatientInViewId,
+          }} = getState();
+
+          let fullName = 'Doctor'
+          // if (allUsersMap && allUsersMap[currentPatientInViewId] && allUsersMap[currentPatientInViewId].hasOwnProperty('profile') ) {
+          //   fullName = allUsersMap[currentPatientInViewId].profile.fullName
+          // }
+          if (message.user && message.user.fullName)
+            fullName = message.user.fullName
+
+          var note = {rol, user: message.groupid, fullName, time: message.timestamp, noteId: message.id}
+          fetchers[rol] =  api.team.sendNotification.bind(api, note)
+        } else {
+
+          let team = getTeamPatient(getState)
+
+          for (var i = 0; i < team.length; i++) {
+            let key = rol+'-'+team[i].userid
+            var note = {rol, user: team[i].userid,fullName: team[i].profile.fullName, time: message.timestamp, noteId: message.id, senderId: message.userid}
+            fetchers[key] = api.team.sendNotification.bind(api, note)
+          }
+        }
+
+        async.parallel(async.reflectAll(fetchers), function(err, results) {
+          const { blip: { currentPatientInViewId } } = getState();
+          dispatch(sync.editMessageThreadSuccess(message));
+          dispatch(worker.dataWorkerUpdateDatumRequest(message, currentPatientInViewId));
+        });
       }
     });
   };
@@ -1350,4 +1443,38 @@ export function disconnectDataSource(api, id, dataSourceFilter) {
       });
     }
   };
+}
+
+// Mark: utils
+
+function getTeamPatient(getState) {
+  let team = [];
+
+  let { blip: {
+    allUsersMap,
+    targetUserId,
+    currentPatientInViewId,
+    membersOfTargetCareTeam,
+    permissionsOfMembersInTargetCareTeam
+  }} = getState();
+
+  if (allUsersMap && currentPatientInViewId){
+      if (currentPatientInViewId === targetUserId && membersOfTargetCareTeam) {
+
+        const sharedDonationAccountIds = _.map(getState(), 'userid');
+
+        membersOfTargetCareTeam.forEach((memberId) => {
+          let member = allUsersMap[memberId];
+
+          // We don't want to include data donation accounts here, as they are managed in the settings page
+          if (member.profile && _.indexOf(sharedDonationAccountIds, member.userid) < 0) {
+            member = update(member, {
+              permissions: { $set: permissionsOfMembersInTargetCareTeam[memberId] },
+            });
+            team.push(member);
+          }
+        });
+      }
+  }
+  return team
 }

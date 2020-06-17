@@ -20,7 +20,7 @@ if (self.localStorage && self.localStorage.lang) {
 i18n
   .use(reactI18nextModule)
   .init({
-    fallbackLng: 'en',
+    fallbackLng: ['es','en'],
     lng: defaultLanguage,
 
     // To allow . in keys

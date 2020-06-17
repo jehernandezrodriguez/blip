@@ -51,6 +51,7 @@ var Message = translate() (React.createClass({
       when: this.getDisplayTimestamp(this.props.theNote.timestamp)
       });
     }
+    this.notifyReadNote()
   },
   getUserDisplayName: function(user) {
     var result = 'Anonymous user';
@@ -59,6 +60,18 @@ var Message = translate() (React.createClass({
     }
     return result;
   },
+
+  notifyReadNote: async function() {
+    if (!this.props.userid) return
+    var data = {noteId: this.props.theNote.id}
+    fetch('https://notifications-salud.herokuapp.com/api/user-notified/' + this.props.userid, {method: 'POST',
+      headers: {
+       'Accept': 'application/json',
+         'Content-Type': 'application/json'
+       },
+       body:JSON.stringify(data)})
+  },
+
   isComment: function() {
     return _.isEmpty(this.props.theNote.parentmessage) === false;
   },

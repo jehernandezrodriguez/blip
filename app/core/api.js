@@ -682,8 +682,21 @@ api.team.getNotes = function(userId, options = {}, cb){
       return cb(error);
     }
 
+    //messages = messages.map(v => ({...v, userCurrent: tidepool.getUserId()}))
     return cb(null,messages);
   });
+};
+
+api.team.getNotifications = function(userId, options = {}, cb){
+  let id = tidepool.getUserId()
+  return fetch('https://notifications-salud.herokuapp.com/api/notificationsbysender/'+ id + '/sender/' + userId)
+        .then((response) => {
+            return response.json().then((data) => {
+                return cb(null, data);
+            }).catch((err) => {
+                cb(err);
+            })
+        });
 };
 
 //Add a comment
@@ -693,6 +706,25 @@ api.team.replyToMessageThread = function(message,cb){
   tidepool.replyToMessageThread(message, function(error,replyId){
     if (error) {
       return cb(error);
+    }
+
+    if (message.hasOwnProperty('user')) {
+      let fullName = ''
+      if (message.user.profile && message.user.profile.fullName) {
+          fullName = message.user.profile.fullName
+      }
+
+      let note = { rol:message.rol,
+                   user: message.userid,
+                   fullName,
+                   time: message.timestamp,
+                   noteId: message.parentmessage,
+                   type: 'reply'
+                 };
+
+      api.team.sendNotification(note,(err, nota) => {
+        console.log(nota);
+      })
     }
     if (cb) {
       cb(null, replyId);
@@ -712,6 +744,23 @@ api.team.startMessageThread = function(message,cb){
       cb(null, messageId);
     }
   });
+};
+
+api.team.sendNotification = function(data, cb){
+
+  data.senderId = tidepool.getUserId()
+
+  return fetch('https://notifications-salud.herokuapp.com/api/notification/' + data.user, {method: 'POST', headers: {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json'
+  },body:JSON.stringify(data)})
+        .then((response) => {
+            return response.json().then((data) => {
+                return cb(null, data);
+            }).catch((err) => {
+                cb(err);
+            })
+        });
 };
 
 api.team.editMessage = function(message,cb){

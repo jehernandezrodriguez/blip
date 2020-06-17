@@ -58,6 +58,7 @@ var Messages = translate()(React.createClass({
       <Message
         key={message.id}
         theNote={message}
+        userid={this.props.user.userid}
         imageSize='large'
         onSaveEdit={this.getSaveEdit(message.userid)}
         timePrefs={this.props.timePrefs} />
@@ -178,6 +179,8 @@ var Messages = translate()(React.createClass({
         userid: this.props.user.userid,
         groupid: parent.groupid,
         messagetext: formValues.text,
+        rol: this.props.user.profile.hasOwnProperty('patient') ? 'patient' : 'clinic',
+        user: this.props.user,
         timestamp: formValues.timestamp
       };
 
@@ -205,6 +208,8 @@ var Messages = translate()(React.createClass({
         userid : this.props.user.userid,
         groupid : this.props.patient.userid,
         messagetext : formValues.text,
+        rol: this.props.user.profile.hasOwnProperty('patient') ? 'patient' : 'clinic',
+        user: this.props.user,
         timestamp : sundial.formatForStorage(
           formValues.timestamp,
           sundial.getOffsetFromTime(formValues.timestamp)

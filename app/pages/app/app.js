@@ -266,7 +266,7 @@ export class AppComponent extends React.Component {
       userIsDonor,
     } = this.props;
 
-    if (showingDonateBanner) {
+    if (false && showingDonateBanner) {
       return (
         <div className="App-donatebanner">
           <DonateBanner
@@ -389,6 +389,8 @@ export class AppComponent extends React.Component {
       ],
       this.props.location
     );
+
+    shouldDisplayFooterLinks = false
 
     return (
       <div className='container-nav-outer footer'>

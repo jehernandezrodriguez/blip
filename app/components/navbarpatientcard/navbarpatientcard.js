@@ -128,7 +128,7 @@ var NavbarPatientCard = translate()(React.createClass({
         e.preventDefault();
         e.stopPropagation();
       }
-      self.setState({showUploadOverlay: true});
+      self.setState({showUploadOverlay: false});
       launchCustomProtocol('tidepoolupload://open');
       self.props.trackMetric('Clicked Navbar Upload Data');
     };

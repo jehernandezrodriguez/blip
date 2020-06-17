@@ -129,7 +129,7 @@ export let Login = translate()(React.createClass({
 
   renderForgotPassword: function() {
     const { t } = this.props;
-    return <Link to="/request-password-reset">{t('Forgot your password?')}</Link>;
+    return (<a href="mailto:cloudi.telemedicina@gmail.com?subject=Restablecer contraseña"> {t('Forgot your password?')}</a>)
   },
 
   handleSubmit: function(formValues) {

@@ -32,6 +32,7 @@
     "express": "4.16.3",
     "hakken": "0.1.11",
     "helmet": "3.13.0",
+    "react-tooltip": "^4.2.6",
     "rollbar": "2.14.4"
   },
   "devDependencies": {

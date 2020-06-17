@@ -27,6 +27,31 @@ import { SortHeaderCell, SortTypes } from './sortheadercell';
 import personUtils from '../../core/personutils';
 import ModalOverlay from '../modaloverlay';
 
+import ReactTooltip from 'react-tooltip';
+
+const NoteCell = ({ rowIndex, data, col, icon, ...props }) => (
+  <Cell {...props}>
+    <div className="peopletable-cell">
+      <div className="peopletable-cell-content">
+
+      <p data-tip={data[rowIndex][col].times} data-place="bottom" data-effect="solid">
+        {data[rowIndex][col].count}
+        {icon}
+      </p>
+      <ReactTooltip html={true} />
+
+      </div>
+    </div>
+  </Cell>
+);
+
+NoteCell.propTypes = {
+  col: React.PropTypes.string,
+  data: React.PropTypes.array,
+  rowIndex: React.PropTypes.number,
+  icon: React.PropTypes.object,
+};
+
 const TextCell = ({ rowIndex, data, col, icon, ...props }) => (
   <Cell {...props}>
     <div className="peopletable-cell">
@@ -120,6 +145,7 @@ const PeopleTable = translate()(class PeopleTable extends React.Component {
         birthday: bday,
         birthdayOrderable: new Date(bday),
         userid: person.userid,
+        notifications: {count: person.notesCount, times :person.notifications}
       };
     });
 
@@ -371,6 +397,20 @@ const PeopleTable = translate()(class PeopleTable extends React.Component {
           />}
           width={120}
           flexGrow={0}
+        />
+
+        <Column
+          columnKey="notificationsOrderable"
+          header={t('NOTIFICATIONS')}
+          cell={<NoteCell
+            data={dataList}
+            col="notifications"
+            src={''}
+            icon={<img className={'alert-icon'}
+              src={require('./images/alert.svg')}
+              alt='Alert Notes'/>}
+          /> }
+          width={120}
         />
 
         <Column

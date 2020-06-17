@@ -2,7 +2,7 @@
 <html>
 
 <head>
-  <title>Tidepool</title>
+  <title>ClouDi WEB</title>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
@@ -10,12 +10,31 @@
 
 <body>
   <div id="app">
-    <p class="loading">Loading app...</p>
+    <p class="loading">Cargando app...</p>
   </div>
   <!-- config -->
-  <!-- Start of tidepoolsupport Zendesk Widget script -->
-  <script id="ze-snippet" src="https://static.zdassets.com/ekr/snippet.js?key=d1aad8b3-67d8-4f44-9d87-9e8a0ed8149d"> </script>
-  <!-- End of tidepoolsupport Zendesk Widget script -->
-</body>
+  </body>
+
+<style media="screen">
+#tidelineMain.basics #tidelineContainer .DashboardSection:nth-child(2), #tidelineMain.basics #tidelineContainer .DashboardSection:nth-child(3), #tidelineMain.basics #tidelineContainer .DashboardSection:nth-child(4) {
+  display:none;
+}
+</style>
+
+<script type="text/javascript">
+    window.onload = function() {
+      document.body.addEventListener('click', function (evt) {
+        setTimeout(function(){
+            if (document.getElementsByClassName("patient-data-subnav-dates-daily").length){
+              var datePatient = document.getElementsByClassName("patient-data-subnav-dates-daily")[0].textContent;
+              datePatient = datePatient.replace("PMPMPMPM","")
+              datePatient = datePatient.replace("AMAMAMAM","")
+              document.getElementsByClassName("patient-data-subnav-dates-daily")[0].textContent = datePatient
+            }
+        }, 1000);
+      }, false)
+
+    };
+  </script>
 
 </html>

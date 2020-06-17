@@ -94,7 +94,8 @@ export default translate()(class UploaderButton extends Component {
           onClick={this.props.onClick}>
           {t('Download for PC')}
         </a>,
-        <a
+        {/*
+          <a
           key={'mac'}
           className={macReleaseClasses}
           href={`${this.state.latestMacRelease}`}
@@ -102,6 +103,7 @@ export default translate()(class UploaderButton extends Component {
           onClick={this.props.onClick}>
           {t('Download for Mac')}
         </a>
+        */}
       ]
     }
 

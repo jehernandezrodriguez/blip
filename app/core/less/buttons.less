@@ -116,14 +116,15 @@ a.btn-danger {
 .btn-chart,
 a.btn-chart {
   font-weight: normal;
-  background-color: @white-color;
+  background-color: fade(@blue-green-light, 50%);
   border-color: fade(@purple-highcontrast, 15%);
   color: @purple-highcontrast;
 
   &:hover,
   &:focus,
   &:active {
-    background-color: fade(@blue-green-light, 50%);
+    background-color: @purple;
+    color: @purple-highcontrast;
     border-color: fade(@purple-highcontrast, 25%);
   }
 }
